@@ -39,7 +39,7 @@ h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:0}
 .scorebox{font-family:var(--f-mono);font-size:15px;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .scorebox b{color:var(--accent);font-size:19px}
 
-nav.stations{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:18px}
+nav.stations{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:18px}
 nav.stations button{font:inherit;font-size:13px;line-height:1.2;color:var(--ink);background:var(--card);border:1.5px solid var(--line);
   border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;min-width:0}
 nav.stations button .n{display:block;font-family:var(--f-display);font-weight:800;font-size:18px}
@@ -280,51 +280,15 @@ stations.push({id:'C', name:'Graph-Detektiv', short:'Graphen', min:'3 Min.', ref
   draw();
  }});
 
-// D: Regler-Challenge
-stations.push({id:'D', name:'Regler-Challenge', short:'b und a', min:'3 Min.', ref:'Aufgabe 4 und 5',
- targets:[
-  {b:1.5,a:2,pts:[{x:0,y:1.5,l:'(0|1,5)',dx:-8,anchor:'end'},{x:2,y:6,l:'(2|6)'}],yr:[-4,8],tip:'Tipp: f(0) = b. Und von x = 0 bis x = 2 wird zweimal mit a multipliziert.'},
-  {b:-2,a:0.5,pts:[{x:0,y:-2,l:'(0|−2)'},{x:-2,y:-8,l:'(−2|−8)'}],yr:[-9,3],tip:'Tipp: b ist negativ. Der Graph steigt, obwohl b < 0 ist. Was folgt daraus für a?'},
- ],
- render(sec){
-  setMax('D',this.targets.length); let t=0;
-  sec.append(el('p',{class:'intro'},'Stelle b und a mit den Reglern so ein, dass dein blauer Graph durch <b>beide</b> markierten Punkte geht. Dann auf „Prüfen“ tippen.'));
-  const g=el('div',{class:'graphrow'}); sec.append(g);
-  const left=el('div'); const right=el('div',{style:'display:flex;flex-direction:column;gap:14px;min-width:0'});
-  g.append(left,right);
-  const head=el('h3'); const live=el('div',{class:'live'});
-  const sb=el('div',{class:'slider'},'<label for="sb">b</label><input id="sb" type="range" min="-4" max="4" step="0.5" value="1"><output id="ob">1</output>');
-  const sa=el('div',{class:'slider'},'<label for="sa">a</label><input id="sa" type="range" min="0.25" max="3" step="0.05" value="1.2"><output id="oa">1,2</output>');
-  const fbx=el('div',{class:'fb'}); const btns=el('div',{class:'choice'});
-  right.append(head,sb,sa,live,btns,fbx);
-  let solved=[], tries=0;
-  const vals=()=>({b:+$('#sb',sb).value,a:+$('#sa',sa).value});
-  const redraw=()=>{ const tg=this.targets[t], {b,a}=vals(); $('#ob',sb).textContent=de(b); $('#oa',sa).textContent=de(a);
-    live.innerHTML='f(x) = '+T(de(b),de(a));
-    left.innerHTML=plot({fns:[{f:x=>b*a**x,cls:'c1'}],pts:tg.pts,xr:[-4,4],yr:tg.yr}); };
-  const load=()=>{ tries=0; head.textContent=`Ziel ${t+1} von ${this.targets.length}`; $('#sb',sb).value=1; $('#sa',sa).value=1.2; fbx.innerHTML=''; fbx.className='fb';
-    btns.innerHTML=''; btns.append(el('button',{type:'button',class:'btn primary',onclick:check},'Prüfen'),el('button',{type:'button',class:'btn',onclick:show},'Lösung zeigen'));
-    redraw(); };
-  const next=()=>{ if(t<this.targets.length-1){ btns.append(el('button',{type:'button',class:'btn primary',onclick:()=>{t++;load();}},'Nächstes Ziel →')); } };
-  const lock=()=>btns.querySelectorAll('button').forEach(b=>b.disabled=true);
-  const check=()=>{ const tg=this.targets[t], {b,a}=vals(); tries++;
-    if(near(b,tg.b)&&near(a,tg.a)){ lock(); if(!solved[t]){solved[t]=1; award('D');} fbx.className='fb okt'; fbx.innerHTML=fb(true,`Dein Graph trifft beide Punkte: f(x) = ${T(de(tg.b),de(tg.a))}.`+(tries>1?` (${tries} Versuche)`:'')); next(); }
-    else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht.</span> `+(near(b,tg.b)?'b stimmt schon. Jetzt a anpassen. ':'Prüfe zuerst den Punkt auf der y-Achse. ')+(tries>=2?tg.tip:''); } };
-  const show=()=>{ const tg=this.targets[t]; $('#sb',sb).value=tg.b; $('#sa',sa).value=tg.a; redraw(); lock();
-    fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Lösung:</span> f(x) = ${T(de(tg.b),de(tg.a))}. ${tg.tip.replace('Tipp: ','')}`; next(); };
-  sb.querySelector('input').addEventListener('input',redraw); sa.querySelector('input').addEventListener('input',redraw);
-  load();
- }});
-
-// E: Term bestimmen
-stations.push({id:'E', name:'Funktionsterm bestimmen', short:'Term finden', min:'4 Min.', ref:'Aufgabe 5, 6 und 7',
+// D: Term bestimmen
+stations.push({id:'D', name:'Funktionsterm bestimmen', short:'Term finden', min:'4 Min.', ref:'Aufgabe 5, 6 und 7',
  tasks:[
   {A:'(0 | 4)',B:'(2 | 36)',b:4,a:3,h:['f(0) = b · a⁰ = b, also b = 4.','Einsetzen von B: 4 · a² = 36','a² = 9, also a = 3 (a muss positiv sein).']},
   {A:'(0 | 5)',B:'(3 | 0,625)',b:5,a:0.5,h:['f(0) = b, also b = 5.','Einsetzen von B: 5 · a³ = 0,625','a³ = 0,125, also a = 0,5.']},
   {A:'(1 | 6)',B:'(3 | 54)',b:2,a:3,h:['(I) 6 = b · a¹   (II) 54 = b · a³','(I) nach b auflösen: b = 6/a, in (II) einsetzen: 54 = (6/a) · a³ = 6 · a²','a² = 9, also a = 3 (nicht −3). Mit (I): b = 6 : 3 = 2.']},
  ],
  render(sec){
-  setMax('E',this.tasks.length*2);
+  setMax('D',this.tasks.length*2);
   sec.append(el('p',{class:'intro'},'Die Punkte A und B liegen auf dem Graphen von f(x) = b · a<sup>x</sup>. Bestimme b und a. Dezimalzahlen mit Komma oder Punkt. Bei jeder Zahl zählt der erste Prüf-Versuch.'));
   this.tasks.forEach((tk,k)=>{
     const box=el('div',{class:'task'});
@@ -335,7 +299,7 @@ stations.push({id:'E', name:'Funktionsterm bestimmen', short:'Term finden', min:
     bt.append(el('button',{type:'button',class:'btn primary',onclick:()=>{
       const vb=parseNum(ib.value), va=parseNum(ia.value); if(isNaN(vb)||isNaN(va)){fbx.className='fb badt';fbx.innerHTML='<span class="tag">Bitte</span> trage für b und a jeweils eine Zahl ein.';return;}
       const okb=near(vb,tk.b), oka=near(va,tk.a);
-      [[ib,okb,'b'],[ia,oka,'a']].forEach(([inp,ok,key])=>{ inp.classList.toggle('ok',ok); inp.classList.toggle('bad',!ok); if(first[key]){ if(ok)award('E'); first[key]=false; } if(ok)inp.readOnly=true; });
+      [[ib,okb,'b'],[ia,oka,'a']].forEach(([inp,ok,key])=>{ inp.classList.toggle('ok',ok); inp.classList.toggle('bad',!ok); if(first[key]){ if(ok)award('D'); first[key]=false; } if(ok)inp.readOnly=true; });
       if(okb&&oka){ box.classList.add('ok'); fbx.className='fb okt'; fbx.innerHTML=fb(true,`f(x) = ${T(de(tk.b),de(tk.a))}`); bt.querySelectorAll('button').forEach(b=>b.disabled=true);}
       else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht ganz.</span> ${okb?'b stimmt.':'b stimmt nicht.'} ${oka?'a stimmt.':'a stimmt nicht.'} Korrigiere oder hol dir einen Tipp.`; }
     }},'Prüfen'));
@@ -345,11 +309,11 @@ stations.push({id:'E', name:'Funktionsterm bestimmen', short:'Term finden', min:
   });
  }});
 
-// F: Rechenweg ordnen
-stations.push({id:'F', name:'Rechenweg ordnen', short:'Rechenweg', min:'1–2 Min.', ref:'Aufgabe 6 und 7',
+// E: Rechenweg ordnen
+stations.push({id:'E', name:'Rechenweg ordnen', short:'Rechenweg', min:'1–2 Min.', ref:'Aufgabe 6 und 7',
  steps:['Punkte einsetzen: (I) 10 = b · a¹  und  (II) 40 = b · a³','(I) nach b auflösen: b = 10/a','In (II) einsetzen: 40 = (10/a) · a³','Mit Potenzgesetzen vereinfachen: 4 = a²','Gleichung lösen: a = 2 oder a = −2','a = −2 entfällt, weil a > 0 sein muss. Mit (I): b = 5','Ergebnis: f(x) = 5 · 2ˣ'],
  render(sec){
-  setMax('F',2); let tries=0, fin=false;
+  setMax('E',2); let tries=0, fin=false;
   sec.append(el('p',{class:'intro'},'A(1 | 10) und B(3 | 40) liegen auf dem Graphen von f(x) = b · a<sup>x</sup>. Tippe die Schritte in der richtigen Reihenfolge an. Ein Tipp auf einen einsortierten Schritt nimmt ihn wieder heraus.'));
   const pool=el('div',{class:'pool'}), order=el('div',{class:'order'}); const fbx=el('div',{class:'fb'}); const bt=el('div',{class:'choice'});
   sec.append(el('h3',{},'Dein Rechenweg'),order,el('h3',{},'Schritte zur Auswahl'),pool,bt,fbx);
@@ -364,7 +328,7 @@ stations.push({id:'F', name:'Rechenweg ordnen', short:'Rechenweg', min:'1–2 Mi
   const chk=el('button',{type:'button',class:'btn primary',onclick:()=>{
     tries++; const ok=placed.every((v,k)=>v===k);
     order.querySelectorAll('.step').forEach((b,k)=>b.classList.add(+b.dataset.i===k?'ok':'bad'));
-    if(ok){ fin=true; const p=tries===1?2:tries===2?1:0; if(p)award('F',p); fbx.className='fb okt'; fbx.innerHTML=fb(true,`Der Rechenweg stimmt${tries>1?` (im ${tries}. Versuch)`:''}.`); chk.disabled=true; }
+    if(ok){ fin=true; const p=tries===1?2:tries===2?1:0; if(p)award('E',p); fbx.className='fb okt'; fbx.innerHTML=fb(true,`Der Rechenweg stimmt${tries>1?` (im ${tries}. Versuch)`:''}.`); chk.disabled=true; }
     else if(tries>=3){ fin=true; placed=this.steps.map((_,i)=>i); draw(); order.querySelectorAll('.step').forEach(b=>b.classList.add('ok')); fbx.className='fb badt'; fbx.innerHTML='<span class="tag">Hier ist die richtige Reihenfolge.</span> Vergleiche sie mit Aufgabe 6 auf dem Arbeitsblatt.'; }
     else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht.</span> Rot markierte Schritte stehen an der falschen Stelle. Tippe sie an, um sie neu einzusortieren. (Versuch ${tries} von 3)`; }
   }},'Prüfen');
@@ -413,7 +377,7 @@ function go(i){
   built[s.id].hidden=false; updScore();
   window.scrollTo({top:0,behavior:'auto'});
 }
-Object.entries({A:7,B:8,C:4,D:2,E:6,F:2}).forEach(([k,v])=>setMax(k,v));
+Object.entries({A:7,B:8,C:4,D:6,E:2}).forEach(([k,v])=>setMax(k,v));
 go(0);
 </script>
 </body>
