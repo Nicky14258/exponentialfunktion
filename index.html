@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exponentialfunktionen-Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: ein karierter Heftbogen mit rotem Rand; oben eine Stationsleiste, darunter immer genau eine Station */
+:root{
+  --paper:#fbfcfe; --grid:#dde6f3; --ink:#18306b; --muted:#5a6a8a; --accent:#2457d6;
+  --margin:#d9493b; --ok:#1e8a4c; --ok-bg:#e3f4ea; --bad:#c23a2c; --bad-bg:#fbe6e3;
+  --card:#ffffff; --line:#c9d5e8; --g1:#2457d6; --g2:#d9493b; --g3:#1e8a4c; --axis:#18306b;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121826; --grid:#1f2a3d; --ink:#e4ebf8; --muted:#9aa9c4; --accent:#7ea6ff;
+  --margin:#ff7a6b; --ok:#5fd394; --ok-bg:#163527; --bad:#ff8577; --bad-bg:#3b1d1b;
+  --card:#192235; --line:#2f3d57; --g1:#7ea6ff; --g2:#ff7a6b; --g3:#5fd394; --axis:#c7d3ea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121826; --grid:#1f2a3d; --ink:#e4ebf8; --muted:#9aa9c4; --accent:#7ea6ff;
+  --margin:#ff7a6b; --ok:#5fd394; --ok-bg:#163527; --bad:#ff8577; --bad-bg:#3b1d1b;
+  --card:#192235; --line:#2f3d57; --g1:#7ea6ff; --g2:#ff7a6b; --g3:#5fd394; --axis:#c7d3ea; color-scheme:dark}
+
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:820px;margin:0 auto;position:relative}
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;
+  border-left:3px solid var(--margin);padding-left:14px;margin-bottom:18px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:2px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:800;font-size:26px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:0}
+.scorebox{font-family:var(--f-mono);font-size:15px;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scorebox b{color:var(--accent);font-size:19px}
+
+nav.stations{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:18px}
+nav.stations button{font:inherit;font-size:13px;line-height:1.2;color:var(--ink);background:var(--card);border:1.5px solid var(--line);
+  border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;min-width:0}
+nav.stations button .n{display:block;font-family:var(--f-display);font-weight:800;font-size:18px}
+nav.stations button .t{display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.stations button[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+nav.stations button.done .n::after{content:" ✓";color:var(--ok);font-size:14px}
+@media (max-width:560px){nav.stations button .t{display:none}}
+
+section.station{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:20px clamp(16px,3vw,28px);
+  display:flex;flex-direction:column;gap:16px}
+.st-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.meta{font-size:14px;color:var(--muted)}
+.intro{margin:0;max-width:62ch}
+.term{font-family:var(--f-mono);font-weight:500;white-space:nowrap}
+.term sup{font-size:.72em}
+.box{border:1.5px dashed var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)}
+
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+.item .q{min-width:0}
+.item.ok{border-color:var(--ok);background:var(--ok-bg)}
+.item.bad{border-color:var(--bad);background:var(--bad-bg)}
+.item .fb{grid-column:1/-1;font-size:15px}
+.choice{display:flex;gap:6px;flex-wrap:wrap}
+button.btn,.choice button{font:inherit;font-size:15px;font-weight:700;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:6px 14px;cursor:pointer}
+.choice button:hover:not(:disabled),button.btn:hover:not(:disabled){border-color:var(--accent)}
+.choice button.picked{border-color:var(--ink)}
+.choice button:disabled{cursor:default;opacity:.85}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fb .tag{font-weight:700}
+.fb.okt .tag{color:var(--ok)} .fb.badt .tag{color:var(--bad)}
+
+.graphrow{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:640px){.graphrow{grid-template-columns:1fr}}
+svg.plot{width:100%;height:auto;display:block;background:var(--paper);border:1.5px solid var(--line);border-radius:10px}
+svg .gl{stroke:var(--grid);stroke-width:1}
+svg .ax{stroke:var(--axis);stroke-width:1.6}
+svg .tk{fill:var(--muted);font:11px var(--f-mono)}
+svg .c1{stroke:var(--g1);fill:none;stroke-width:3}
+svg .c2{stroke:var(--g2);fill:none;stroke-width:3}
+svg .c3{stroke:var(--g3);fill:none;stroke-width:3;stroke-dasharray:7 5}
+svg .pt{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}
+svg .ptl{fill:var(--ink);font:600 12px var(--f-mono)}
+svg .lbl1{fill:var(--g1);font:700 14px var(--f-mono)} svg .lbl2{fill:var(--g2);font:700 14px var(--f-mono)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts button{font:inherit;font-size:16px;text-align:left;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;min-width:0}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.ok{border-color:var(--ok);background:var(--ok-bg)} .opts button.bad{border-color:var(--bad);background:var(--bad-bg)}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+.roundbar{display:flex;gap:6px}
+.roundbar span{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.roundbar span.ok{background:var(--ok)} .roundbar span.bad{background:var(--bad)} .roundbar span.cur{background:var(--accent)}
+
+.slider{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.slider label{font-family:var(--f-mono);font-weight:500}
+.slider input{width:100%;accent-color:var(--accent)}
+.slider output{font-family:var(--f-mono);min-width:4.5ch;text-align:right;font-variant-numeric:tabular-nums}
+.live{font-family:var(--f-mono);font-size:18px}
+
+.task{border:1.5px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.task.ok{border-color:var(--ok);background:var(--ok-bg)}
+.fields{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.fields label{font-family:var(--f-mono);display:flex;align-items:center;gap:6px}
+.fields input{font:inherit;font-family:var(--f-mono);width:7ch;padding:6px 8px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.fields input.ok{border-color:var(--ok)} .fields input.bad{border-color:var(--bad)}
+.hint{font-size:15px;color:var(--muted);margin:0;padding-left:20px}
+.hint li+li{margin-top:2px}
+
+.pool,.order{display:flex;flex-direction:column;gap:8px;min-height:48px}
+.order{border:1.5px dashed var(--line);border-radius:10px;padding:8px;counter-reset:s}
+.step{font:inherit;font-size:16px;text-align:left;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.order .step{counter-increment:s}
+.order .step::before{content:counter(s) ". ";font-weight:700;color:var(--accent)}
+.step.ok{border-color:var(--ok);background:var(--ok-bg)} .step.bad{border-color:var(--bad);background:var(--bad-bg)}
+.empty{color:var(--muted);font-size:15px;padding:6px 4px}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;border-top:1.5px solid var(--line);padding-top:14px}
+
+.results{display:flex;flex-direction:column;gap:10px}
+.rrow{display:grid;grid-template-columns:minmax(0,12rem) 1fr 4.5rem;gap:12px;align-items:center}
+.rbar{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--accent)}
+.rrow .v{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:480px){.rrow{grid-template-columns:1fr 4rem}.rrow .rbar{grid-column:1/-1;grid-row:2}}
+.verdict{font-family:var(--f-display);font-size:22px;font-weight:800;margin:0}
+.tips{margin:0;padding-left:20px}
+@media (prefers-reduced-motion:no-preference){.item,.task,.opts button,.step{transition:background .2s,border-color .2s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Lambacher Schweizer 10 · Kap. I.2 · Selbsttest</div>
+      <h1>Exponentialfunktionen-Check</h1>
+    </div>
+    <div class="scorebox" aria-live="polite">Punkte <b id="total">0</b> / <span id="max">0</span></div>
+  </header>
+  <nav class="stations" id="nav" aria-label="Stationen"></nav>
+  <main id="stage"></main>
+</div>
+
+<script>
+// ---------- Hilfen ----------
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, attrs={}, html='') => { const e=document.createElement(tag); for(const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); } if(html) e.innerHTML=html; return e; };
+const de = n => (Math.round(n*1000)/1000).toString().replace('.',',');
+const T = (b,a) => `<span class="term">${b} · ${a}<sup>x</sup></span>`;
+const parseNum = s => { s=String(s).trim().replace(/\s/g,'').replace(',','.'); if(/^[-+]?\d+\/\d+$/.test(s)){const [p,q]=s.split('/');return +p/+q;} return s===''?NaN:Number(s); };
+const near = (x,y,eps=0.011) => Math.abs(x-y)<=eps;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ---------- Plot ----------
+function plot({fns=[], pts=[], xr=[-4,4], yr=[-2,8], w=420, h=340}){
+  const pad=26, X=x=>pad+(x-xr[0])/(xr[1]-xr[0])*(w-2*pad), Y=y=>h-pad-(y-yr[0])/(yr[1]-yr[0])*(h-2*pad);
+  const ystep = (yr[1]-yr[0])>14?2:1;
+  let s=`<svg class="plot" viewBox="0 0 ${w} ${h}" role="img"><defs><clipPath id="cp${plot.n=(plot.n||0)+1}"><rect x="${pad}" y="${pad}" width="${w-2*pad}" height="${h-2*pad}"/></clipPath></defs>`;
+  for(let x=Math.ceil(xr[0]);x<=xr[1];x++) s+=`<line class="gl" x1="${X(x)}" x2="${X(x)}" y1="${pad}" y2="${h-pad}"/>`;
+  for(let y=Math.ceil(yr[0]);y<=yr[1];y++) s+=`<line class="gl" y1="${Y(y)}" y2="${Y(y)}" x1="${pad}" x2="${w-pad}"/>`;
+  s+=`<line class="ax" x1="${pad}" x2="${w-pad+8}" y1="${Y(0)}" y2="${Y(0)}"/><line class="ax" y1="${h-pad}" y2="${pad-8}" x1="${X(0)}" x2="${X(0)}"/>`;
+  s+=`<path class="ax" fill="none" d="M${w-pad+8} ${Y(0)} l-7 -4 m7 4 l-7 4 M${X(0)} ${pad-8} l-4 7 m4 -7 l4 7"/>`;
+  for(let x=Math.ceil(xr[0]);x<=xr[1];x++) if(x) s+=`<text class="tk" x="${X(x)}" y="${Y(0)+14}" text-anchor="middle">${x}</text>`;
+  for(let y=Math.ceil(yr[0]);y<=yr[1];y++) if(y && y%ystep===0) s+=`<text class="tk" x="${X(0)-5}" y="${Y(y)+4}" text-anchor="end">${y}</text>`;
+  s+=`<text class="tk" x="${w-pad+2}" y="${Y(0)-6}">x</text><text class="tk" x="${X(0)+6}" y="${pad-2}">y</text>`;
+  fns.forEach(f=>{ let d=''; for(let i=0;i<=300;i++){const x=xr[0]+(xr[1]-xr[0])*i/300; let y=f.f(x); y=Math.max(yr[0]-50,Math.min(yr[1]+50,y)); d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1);} s+=`<path class="${f.cls}" d="${d}" clip-path="url(#cp${plot.n})"/>`;
+    if(f.label){ s+=`<text class="${f.cls==='c2'?'lbl2':'lbl1'}" x="${X(f.lx)}" y="${Y(f.ly)}">${f.label}</text>`; } });
+  pts.forEach(p=>{ s+=`<circle class="pt" cx="${X(p.x)}" cy="${Y(p.y)}" r="5"/>`; if(p.l) s+=`<text class="ptl" x="${X(p.x)+(p.dx??8)}" y="${Y(p.y)+(p.dy??-8)}" ${p.anchor?`text-anchor="${p.anchor}"`:''}>${p.l}</text>`; });
+  return s+'</svg>';
+}
+
+// ---------- Zustand ----------
+const S = { cur:0, pts:{}, max:{}, done:{} };
+function setMax(id,m){S.max[id]=m; S.pts[id]=S.pts[id]||0;}
+function award(id,p=1){S.pts[id]+=p; updScore();}
+function updScore(){ $('#total').textContent=Object.values(S.pts).reduce((a,b)=>a+b,0); $('#max').textContent=Object.values(S.max).reduce((a,b)=>a+b,0); renderNav(); }
+function fb(ok, text){ return `<span class="tag">${ok?'Richtig.':'Leider falsch.'}</span> ${text}`; }
+
+// ---------- Stationen ----------
+const stations = [];
+
+// A: Wahr oder falsch
+stations.push({id:'A', name:'Wahr oder falsch?', short:'Eigenschaften', min:'2 Min.', ref:'Aufgabe 1 und 2',
+ items:[
+  {q:`Gegeben ist f(x) = ${T('2','0,8')}. Der Graph von f fällt.`, a:true, e:'Der Wachstumsfaktor 0,8 liegt zwischen 0 und 1, also nehmen die Funktionswerte ab.'},
+  {q:`Für f(x) = ${T('2','0,8')} gilt f(0) = 0,8.`, a:false, e:'Wegen 0,8⁰ = 1 ist f(0) = 2 · 1 = 2. Der Wert b ist immer der y-Achsenabschnitt.'},
+  {q:`Für große x werden die Funktionswerte von f(x) = ${T('2','0,8')} irgendwann negativ.`, a:false, e:'Die Werte kommen der x-Achse beliebig nahe, erreichen sie aber nie. Die x-Achse ist Asymptote, f(x) > 0 für alle x.'},
+  {q:`Für f(x) = ${T('2','0,8')} gilt f(x + 1) = 0,8 · f(x).`, a:true, e:'f(x+1) = 2 · 0,8<sup>x+1</sup> = 2 · 0,8<sup>x</sup> · 0,8 = f(x) · 0,8. Pro Schritt nach rechts wird mit a multipliziert.'},
+  {q:`Der Graph von g(x) = ${T('2','1,25')} ist der an der y-Achse gespiegelte Graph von f(x) = ${T('2','0,8')}.`, a:true, e:'1 : 0,8 = 1,25. Wachstumsfaktoren a und 1/a liefern zur y-Achse symmetrische Graphen.'},
+  {q:`h(x) = ${T('2','(−0,8)')} ist eine Exponentialfunktion.`, a:false, e:'Bei f(x) = b · a<sup>x</sup> muss a positiv (und ≠ 1) sein. (−0,8)<sup>0,5</sup> wäre z. B. gar nicht definiert.'},
+  {q:`Der Graph von k(x) = ${T('6','0,8')} entsteht aus dem von f(x) = ${T('2','0,8')} durch Streckung mit Faktor 3 in y-Richtung.`, a:true, e:'k(x) = 3 · f(x). Jeder Funktionswert wird verdreifacht.'},
+ ],
+ render(sec){
+  setMax('A',this.items.length);
+  sec.append(el('p',{class:'intro'},'Entscheide bei jeder Aussage: wahr oder falsch? Nur der erste Klick zählt.'));
+  const list=el('div',{class:'items'}); sec.append(list);
+  this.items.forEach(it=>{
+    const row=el('div',{class:'item'}); row.append(el('div',{class:'q'},it.q));
+    const ch=el('div',{class:'choice'}); const fbx=el('div',{class:'fb'});
+    [['wahr',true],['falsch',false]].forEach(([lab,val])=>{
+      ch.append(el('button',{type:'button',onclick:e=>{
+        const ok=val===it.a; ch.querySelectorAll('button').forEach(b=>b.disabled=true); e.currentTarget.classList.add('picked');
+        row.classList.add(ok?'ok':'bad'); fbx.className='fb '+(ok?'okt':'badt'); fbx.innerHTML=fb(ok,it.e); if(ok)award('A');
+      }},lab));
+    });
+    row.append(ch,fbx); list.append(row);
+  });
+ }});
+
+// B: Steigt oder fällt
+stations.push({id:'B', name:'Steigt oder fällt?', short:'Monotonie', min:'2 Min.', ref:'Aufgabe 2a und 3',
+ items:[
+  {t:T('3','(5⁄4)'), a:'steigt', e:'5/4 = 1,25 > 1 und b > 0.'},
+  {t:T('3','(4⁄5)'), a:'fällt', e:'4/5 = 0,8 < 1 und b > 0.'},
+  {t:T('3','2'), a:'steigt', e:'a = 2 > 1 und b > 0.'},
+  {t:T('3','(1⁄0,9)'), a:'steigt', e:'1 : 0,9 ≈ 1,11 > 1. Der Kehrwert einer Zahl unter 1 ist größer als 1.'},
+  {t:T('0,5','1,1'), a:'steigt', e:'Ein kleines b ändert nichts: a = 1,1 > 1 und b > 0.'},
+  {t:T('−3','2'), a:'fällt', e:'Vorsicht: b < 0. Der Graph von 3 · 2<sup>x</sup> wird an der x-Achse gespiegelt, aus „steigt“ wird „fällt“.'},
+  {t:T('−3','0,9'), a:'steigt', e:'b < 0 und a < 1: Der fallende Graph von 3 · 0,9<sup>x</sup> wird an der x-Achse gespiegelt, also steigt er.'},
+  {t:T('5','0,99'), a:'fällt', e:'0,99 < 1, auch wenn die Abnahme langsam ist.'},
+ ],
+ render(sec){
+  setMax('B',this.items.length);
+  sec.append(el('p',{class:'intro'},'Steigt der Graph oder fällt er? Achte auf a <em>und</em> auf das Vorzeichen von b.'));
+  const list=el('div',{class:'items'}); sec.append(list);
+  this.items.forEach(it=>{
+    const row=el('div',{class:'item'}); row.append(el('div',{class:'q'},'f(x) = '+it.t));
+    const ch=el('div',{class:'choice'}); const fbx=el('div',{class:'fb'});
+    ['steigt','fällt'].forEach(lab=>ch.append(el('button',{type:'button',onclick:e=>{
+      const ok=lab===it.a; ch.querySelectorAll('button').forEach(b=>b.disabled=true); e.currentTarget.classList.add('picked');
+      row.classList.add(ok?'ok':'bad'); fbx.className='fb '+(ok?'okt':'badt'); fbx.innerHTML=fb(ok,it.e); if(ok)award('B');
+    }},lab)));
+    row.append(ch,fbx); list.append(row);
+  });
+ }});
+
+// C: Graph-Detektiv
+stations.push({id:'C', name:'Graph-Detektiv', short:'Graphen', min:'3 Min.', ref:'Aufgabe 2b, 3 und 4',
+ rounds:[
+  {q:'Der rote Graph entsteht, wenn man den blauen Graphen von f(x) = 3 · 2<sup>x</sup> <b>an der y-Achse spiegelt</b>. Welcher Term gehört zum roten Graphen?',
+   plot:{fns:[{f:x=>3*2**x,cls:'c1',label:'f',lx:1.15,ly:7.2},{f:x=>3*0.5**x,cls:'c2',label:'?',lx:-1.9,ly:7.2}],xr:[-4,4],yr:[-1,9],pts:[{x:0,y:3,l:'(0|3)'}]},
+   opts:[T('3','0,5'),T('−3','2'),T('0,5','2'),T('3','(−2)')], a:0,
+   e:'Spiegelung an der y-Achse heißt: x wird zu −x. 3 · 2<sup>−x</sup> = 3 · (1/2)<sup>x</sup> = 3 · 0,5<sup>x</sup>.'},
+  {q:'Wie geht der rote Graph von p aus dem blauen Graphen von m(x) = 3 · 0,9<sup>x</sup> hervor?',
+   plot:{fns:[{f:x=>3*0.9**x,cls:'c1',label:'m',lx:2.2,ly:3.3},{f:x=>-3*0.9**x,cls:'c2',label:'p',lx:2.2,ly:-3.8}],xr:[-4,4],yr:[-6,6]},
+   opts:['durch Spiegelung an der x-Achse','durch Spiegelung an der y-Achse','durch Verschiebung um 6 nach unten','durch Streckung mit dem Faktor 3'], a:0,
+   e:'p(x) = −3 · 0,9<sup>x</sup> = −m(x). Jeder Funktionswert ändert sein Vorzeichen, das ist die Spiegelung an der x-Achse.'},
+  {q:'Blau ist h(x) = 0,3<sup>x</sup>, rot ist k(x) = a · 0,3<sup>x</sup>. Welchen Wert hat a?',
+   plot:{fns:[{f:x=>0.3**x,cls:'c1',label:'h',lx:-1.75,ly:6.3},{f:x=>2.5*0.3**x,cls:'c2',label:'k',lx:-0.95,ly:6.3}],xr:[-3,3],yr:[-1,7],pts:[{x:0,y:1},{x:0,y:2.5,l:'(0|2,5)'}]},
+   opts:['a = 2,5','a = 0,3','a = 1,5','a = 0,75'], a:0,
+   e:'Bei x = 0 liest man k(0) = 2,5 ab, und k(0) = a · 0,3⁰ = a. Also a = 2,5. Der Graph von h ist um den Faktor 2,5 in y-Richtung gestreckt.'},
+  {q:'Der Graph geht durch die markierten Punkte. Welcher Term passt?',
+   plot:{fns:[{f:x=>2*3**x,cls:'c1'}],xr:[-3,3],yr:[-1,9],pts:[{x:0,y:2,l:'(0|2)',dx:-8,anchor:'end'},{x:1,y:6,l:'(1|6)'}]},
+   opts:[T('2','3'),T('3','2'),T('6','3'),T('2','(1⁄3)')], a:0,
+   e:'f(0) = b = 2. Von x = 0 zu x = 1 wird der Wert mit a multipliziert: 6 : 2 = 3, also a = 3.'},
+ ],
+ render(sec){
+  setMax('C',this.rounds.length); let i=0; const res=[];
+  const bar=el('div',{class:'roundbar'}); sec.append(bar);
+  const box=el('div'); sec.append(box);
+  const draw=()=>{
+    bar.innerHTML=this.rounds.map((_,k)=>`<span class="${res[k]===true?'ok':res[k]===false?'bad':k===i?'cur':''}"></span>`).join('');
+    const r=this.rounds[i]; box.innerHTML='';
+    const g=el('div',{class:'graphrow'}); g.append(el('div',{},plot(r.plot)));
+    const right=el('div',{style:'display:flex;flex-direction:column;gap:12px;min-width:0'});
+    right.append(el('p',{class:'intro'},`<b>Graph ${i+1} von ${this.rounds.length}.</b> ${r.q}`));
+    const opts=el('div',{class:'opts'}); const fbx=el('div',{class:'fb'});
+    shuffle(r.opts.map((o,k)=>({o,k}))).forEach(({o,k})=>opts.append(el('button',{type:'button',onclick:e=>{
+      const ok=k===r.a; res[i]=ok; opts.querySelectorAll('button').forEach(b=>{b.disabled=true; if(+b.dataset.k===r.a)b.classList.add('ok');});
+      if(!ok)e.currentTarget.classList.add('bad'); if(ok)award('C');
+      fbx.className='fb '+(ok?'okt':'badt'); fbx.innerHTML=fb(ok,r.e);
+      bar.innerHTML=this.rounds.map((_,q)=>`<span class="${res[q]===true?'ok':res[q]===false?'bad':q===i?'cur':''}"></span>`).join('');
+      if(i<this.rounds.length-1) right.append(el('button',{type:'button',class:'btn primary',style:'align-self:start',onclick:()=>{i++;draw();}},'Nächster Graph →'));
+    },'data-k':k},o)));
+    right.append(opts,fbx); g.append(right); box.append(g);
+  };
+  draw();
+ }});
+
+// D: Regler-Challenge
+stations.push({id:'D', name:'Regler-Challenge', short:'b und a', min:'3 Min.', ref:'Aufgabe 4 und 5',
+ targets:[
+  {b:1.5,a:2,pts:[{x:0,y:1.5,l:'(0|1,5)',dx:-8,anchor:'end'},{x:2,y:6,l:'(2|6)'}],yr:[-4,8],tip:'Tipp: f(0) = b. Und von x = 0 bis x = 2 wird zweimal mit a multipliziert.'},
+  {b:-2,a:0.5,pts:[{x:0,y:-2,l:'(0|−2)'},{x:-2,y:-8,l:'(−2|−8)'}],yr:[-9,3],tip:'Tipp: b ist negativ. Der Graph steigt, obwohl b < 0 ist. Was folgt daraus für a?'},
+ ],
+ render(sec){
+  setMax('D',this.targets.length); let t=0;
+  sec.append(el('p',{class:'intro'},'Stelle b und a mit den Reglern so ein, dass dein blauer Graph durch <b>beide</b> markierten Punkte geht. Dann auf „Prüfen“ tippen.'));
+  const g=el('div',{class:'graphrow'}); sec.append(g);
+  const left=el('div'); const right=el('div',{style:'display:flex;flex-direction:column;gap:14px;min-width:0'});
+  g.append(left,right);
+  const head=el('h3'); const live=el('div',{class:'live'});
+  const sb=el('div',{class:'slider'},'<label for="sb">b</label><input id="sb" type="range" min="-4" max="4" step="0.5" value="1"><output id="ob">1</output>');
+  const sa=el('div',{class:'slider'},'<label for="sa">a</label><input id="sa" type="range" min="0.25" max="3" step="0.05" value="1.2"><output id="oa">1,2</output>');
+  const fbx=el('div',{class:'fb'}); const btns=el('div',{class:'choice'});
+  right.append(head,sb,sa,live,btns,fbx);
+  let solved=[], tries=0;
+  const vals=()=>({b:+$('#sb',sb).value,a:+$('#sa',sa).value});
+  const redraw=()=>{ const tg=this.targets[t], {b,a}=vals(); $('#ob',sb).textContent=de(b); $('#oa',sa).textContent=de(a);
+    live.innerHTML='f(x) = '+T(de(b),de(a));
+    left.innerHTML=plot({fns:[{f:x=>b*a**x,cls:'c1'}],pts:tg.pts,xr:[-4,4],yr:tg.yr}); };
+  const load=()=>{ tries=0; head.textContent=`Ziel ${t+1} von ${this.targets.length}`; $('#sb',sb).value=1; $('#sa',sa).value=1.2; fbx.innerHTML=''; fbx.className='fb';
+    btns.innerHTML=''; btns.append(el('button',{type:'button',class:'btn primary',onclick:check},'Prüfen'),el('button',{type:'button',class:'btn',onclick:show},'Lösung zeigen'));
+    redraw(); };
+  const next=()=>{ if(t<this.targets.length-1){ btns.append(el('button',{type:'button',class:'btn primary',onclick:()=>{t++;load();}},'Nächstes Ziel →')); } };
+  const lock=()=>btns.querySelectorAll('button').forEach(b=>b.disabled=true);
+  const check=()=>{ const tg=this.targets[t], {b,a}=vals(); tries++;
+    if(near(b,tg.b)&&near(a,tg.a)){ lock(); if(!solved[t]){solved[t]=1; award('D');} fbx.className='fb okt'; fbx.innerHTML=fb(true,`Dein Graph trifft beide Punkte: f(x) = ${T(de(tg.b),de(tg.a))}.`+(tries>1?` (${tries} Versuche)`:'')); next(); }
+    else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht.</span> `+(near(b,tg.b)?'b stimmt schon. Jetzt a anpassen. ':'Prüfe zuerst den Punkt auf der y-Achse. ')+(tries>=2?tg.tip:''); } };
+  const show=()=>{ const tg=this.targets[t]; $('#sb',sb).value=tg.b; $('#sa',sa).value=tg.a; redraw(); lock();
+    fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Lösung:</span> f(x) = ${T(de(tg.b),de(tg.a))}. ${tg.tip.replace('Tipp: ','')}`; next(); };
+  sb.querySelector('input').addEventListener('input',redraw); sa.querySelector('input').addEventListener('input',redraw);
+  load();
+ }});
+
+// E: Term bestimmen
+stations.push({id:'E', name:'Funktionsterm bestimmen', short:'Term finden', min:'4 Min.', ref:'Aufgabe 5, 6 und 7',
+ tasks:[
+  {A:'(0 | 4)',B:'(2 | 36)',b:4,a:3,h:['f(0) = b · a⁰ = b, also b = 4.','Einsetzen von B: 4 · a² = 36','a² = 9, also a = 3 (a muss positiv sein).']},
+  {A:'(0 | 5)',B:'(3 | 0,625)',b:5,a:0.5,h:['f(0) = b, also b = 5.','Einsetzen von B: 5 · a³ = 0,625','a³ = 0,125, also a = 0,5.']},
+  {A:'(1 | 6)',B:'(3 | 54)',b:2,a:3,h:['(I) 6 = b · a¹   (II) 54 = b · a³','(I) nach b auflösen: b = 6/a, in (II) einsetzen: 54 = (6/a) · a³ = 6 · a²','a² = 9, also a = 3 (nicht −3). Mit (I): b = 6 : 3 = 2.']},
+ ],
+ render(sec){
+  setMax('E',this.tasks.length*2);
+  sec.append(el('p',{class:'intro'},'Die Punkte A und B liegen auf dem Graphen von f(x) = b · a<sup>x</sup>. Bestimme b und a. Dezimalzahlen mit Komma oder Punkt. Bei jeder Zahl zählt der erste Prüf-Versuch.'));
+  this.tasks.forEach((tk,k)=>{
+    const box=el('div',{class:'task'});
+    box.append(el('h3',{},`Aufgabe ${k+1}: A${tk.A} und B${tk.B}`));
+    const f=el('div',{class:'fields'},`<label for="eb${k}">b =<input id="eb${k}" inputmode="decimal" autocomplete="off"></label><label for="ea${k}">a =<input id="ea${k}" inputmode="decimal" autocomplete="off"></label>`);
+    const bt=el('div',{class:'choice'}); const fbx=el('div',{class:'fb'}); const hl=el('ol',{class:'hint'}); let hs=0; const first={b:true,a:true};
+    const ib=$(`#eb${k}`,f), ia=$(`#ea${k}`,f);
+    bt.append(el('button',{type:'button',class:'btn primary',onclick:()=>{
+      const vb=parseNum(ib.value), va=parseNum(ia.value); if(isNaN(vb)||isNaN(va)){fbx.className='fb badt';fbx.innerHTML='<span class="tag">Bitte</span> trage für b und a jeweils eine Zahl ein.';return;}
+      const okb=near(vb,tk.b), oka=near(va,tk.a);
+      [[ib,okb,'b'],[ia,oka,'a']].forEach(([inp,ok,key])=>{ inp.classList.toggle('ok',ok); inp.classList.toggle('bad',!ok); if(first[key]){ if(ok)award('E'); first[key]=false; } if(ok)inp.readOnly=true; });
+      if(okb&&oka){ box.classList.add('ok'); fbx.className='fb okt'; fbx.innerHTML=fb(true,`f(x) = ${T(de(tk.b),de(tk.a))}`); bt.querySelectorAll('button').forEach(b=>b.disabled=true);}
+      else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht ganz.</span> ${okb?'b stimmt.':'b stimmt nicht.'} ${oka?'a stimmt.':'a stimmt nicht.'} Korrigiere oder hol dir einen Tipp.`; }
+    }},'Prüfen'));
+    const hb=el('button',{type:'button',class:'btn',onclick:()=>{ if(hs<tk.h.length){ hl.append(el('li',{},tk.h[hs++])); } if(hs>=tk.h.length) hb.disabled=true; else hb.textContent=`Nächster Tipp (${hs+1}/${tk.h.length})`; }},`Tipp (1/${tk.h.length})`);
+    bt.append(hb);
+    box.append(f,bt,fbx,hl); sec.append(box);
+  });
+ }});
+
+// F: Rechenweg ordnen
+stations.push({id:'F', name:'Rechenweg ordnen', short:'Rechenweg', min:'1–2 Min.', ref:'Aufgabe 6 und 7',
+ steps:['Punkte einsetzen: (I) 10 = b · a¹  und  (II) 40 = b · a³','(I) nach b auflösen: b = 10/a','In (II) einsetzen: 40 = (10/a) · a³','Mit Potenzgesetzen vereinfachen: 4 = a²','Gleichung lösen: a = 2 oder a = −2','a = −2 entfällt, weil a > 0 sein muss. Mit (I): b = 5','Ergebnis: f(x) = 5 · 2ˣ'],
+ render(sec){
+  setMax('F',2); let tries=0, fin=false;
+  sec.append(el('p',{class:'intro'},'A(1 | 10) und B(3 | 40) liegen auf dem Graphen von f(x) = b · a<sup>x</sup>. Tippe die Schritte in der richtigen Reihenfolge an. Ein Tipp auf einen einsortierten Schritt nimmt ihn wieder heraus.'));
+  const pool=el('div',{class:'pool'}), order=el('div',{class:'order'}); const fbx=el('div',{class:'fb'}); const bt=el('div',{class:'choice'});
+  sec.append(el('h3',{},'Dein Rechenweg'),order,el('h3',{},'Schritte zur Auswahl'),pool,bt,fbx);
+  let placed=[]; const mixed=shuffle(this.steps.map((s,i)=>i));
+  const draw=()=>{ order.innerHTML=''; pool.innerHTML='';
+    if(!placed.length) order.append(el('div',{class:'empty'},'Noch leer. Tippe unten den ersten Schritt an.'));
+    placed.forEach((i,pos)=>order.append(el('button',{type:'button',class:'step','data-i':i,onclick:()=>{ if(fin)return; placed.splice(pos,1); clearMarks(); draw(); }},this.steps[i])));
+    mixed.filter(i=>!placed.includes(i)).forEach(i=>pool.append(el('button',{type:'button',class:'step',onclick:()=>{ if(fin)return; placed.push(i); draw(); }},this.steps[i])));
+    if(!pool.children.length) pool.append(el('div',{class:'empty'},'Alle Schritte sind einsortiert.'));
+    chk.disabled=fin||placed.length<this.steps.length; };
+  const clearMarks=()=>{fbx.innerHTML='';};
+  const chk=el('button',{type:'button',class:'btn primary',onclick:()=>{
+    tries++; const ok=placed.every((v,k)=>v===k);
+    order.querySelectorAll('.step').forEach((b,k)=>b.classList.add(+b.dataset.i===k?'ok':'bad'));
+    if(ok){ fin=true; const p=tries===1?2:tries===2?1:0; if(p)award('F',p); fbx.className='fb okt'; fbx.innerHTML=fb(true,`Der Rechenweg stimmt${tries>1?` (im ${tries}. Versuch)`:''}.`); chk.disabled=true; }
+    else if(tries>=3){ fin=true; placed=this.steps.map((_,i)=>i); draw(); order.querySelectorAll('.step').forEach(b=>b.classList.add('ok')); fbx.className='fb badt'; fbx.innerHTML='<span class="tag">Hier ist die richtige Reihenfolge.</span> Vergleiche sie mit Aufgabe 6 auf dem Arbeitsblatt.'; }
+    else { fbx.className='fb badt'; fbx.innerHTML=`<span class="tag">Noch nicht.</span> Rot markierte Schritte stehen an der falschen Stelle. Tippe sie an, um sie neu einzusortieren. (Versuch ${tries} von 3)`; }
+  }},'Prüfen');
+  bt.append(chk); draw();
+ }});
+
+// Auswertung
+stations.push({id:'R', name:'Auswertung', short:'Ergebnis', min:'', render(sec){
+  const items=stations.filter(s=>s.id!=='R');
+  const tot=items.reduce((a,s)=>a+(S.pts[s.id]||0),0), mx=items.reduce((a,s)=>a+(S.max[s.id]??0),0);
+  const unvisited=items.filter(s=>!built[s.id]);
+  const pct=mx?Math.round(tot/mx*100):0;
+  const v = unvisited.length===items.length ? 'Noch keine Station bearbeitet.' : pct>=85?'Sehr sicher. Du hast den Stoff gut verstanden.':pct>=60?'Auf einem guten Weg. Ein paar Stellen solltest du dir noch einmal anschauen.':'Schau dir die Grundlagen noch einmal in Ruhe an.';
+  sec.append(el('p',{class:'verdict'},`${tot} von ${mx} Punkten${mx?` (${pct} %)`:''}`), el('p',{class:'intro'},v));
+  const r=el('div',{class:'results'});
+  items.forEach(s=>{ const m=S.max[s.id]; const p=S.pts[s.id]||0; const q=m?p/m:0;
+    r.append(el('div',{class:'rrow'},`<div>${s.id} · ${s.name}</div><div class="rbar"><i style="width:${Math.round(q*100)}%"></i></div><div class="v">${!built[s.id]?'offen':p+' / '+m}</div>`)); });
+  sec.append(r);
+  const weak=items.filter(s=>built[s.id] && (S.pts[s.id]||0)/S.max[s.id]<0.75);
+  if(unvisited.length) sec.append(el('p',{class:'intro'},`Noch offen: ${unvisited.map(s=>s.name).join(', ')}.`));
+  if(weak.length){ sec.append(el('h3',{},'Das solltest du wiederholen')); sec.append(el('ul',{class:'tips'},weak.map(s=>`<li><b>${s.name}:</b> Arbeitsblatt ${s.ref}</li>`).join(''))); }
+  sec.append(el('div',{class:'box'},'<b>Merke:</b> f(x) = b · a<sup>x</sup> mit a > 0, a ≠ 1. &nbsp;b = f(0) ist der y-Achsenabschnitt. &nbsp;a > 1 und b > 0: steigend, 0 < a < 1 und b > 0: fallend. &nbsp;a und 1/a: Spiegelung an der y-Achse. &nbsp;b und −b: Spiegelung an der x-Achse. &nbsp;Die x-Achse ist Asymptote.'));
+ }});
+
+// ---------- Navigation ----------
+function renderNav(){
+  const nav=$('#nav'); nav.innerHTML='';
+  stations.forEach((s,i)=>{ const d=!!built[s.id] && s.id!=='R';
+    nav.append(el('button',{type:'button','aria-current':String(i===S.cur),class:d?'done':'',onclick:()=>go(i)},`<span class="n">${s.id==='R'?'★':s.id}</span><span class="t">${s.short}</span>`)); });
+}
+const built={};
+function go(i){
+  S.cur=i; const stg=$('#stage');
+  [...stg.children].forEach(c=>c.hidden=true);
+  const s=stations[i];
+  if(s.id==='R' && built.R){ built.R.remove(); delete built.R; }
+  if(!built[s.id]){
+    const sec=el('section',{class:'station'});
+    sec.append(el('div',{class:'st-head'},`<h2>${s.id==='R'?'':'Station '+s.id+': '}${s.name}</h2>${s.min?`<span class="meta">ca. ${s.min}</span>`:''}`));
+    s.render(sec);
+    const foot=el('div',{class:'foot'});
+    foot.append(i>0?el('button',{type:'button',class:'btn',onclick:()=>go(i-1)},'← Zurück'):el('span'));
+    if(i<stations.length-1) foot.append(el('button',{type:'button',class:'btn primary',onclick:()=>go(i+1)},i===stations.length-2?'Zur Auswertung →':'Weiter zu Station '+stations[i+1].id+' →'));
+    sec.append(foot); stg.append(sec); built[s.id]=sec;
+  }
+  built[s.id].hidden=false; updScore();
+  window.scrollTo({top:0,behavior:'auto'});
+}
+Object.entries({A:7,B:8,C:4,D:2,E:6,F:2}).forEach(([k,v])=>setMax(k,v));
+go(0);
+</script>
+</body>
+</html>
